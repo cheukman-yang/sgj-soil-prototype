@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Soil Aggregate Card Prototype | 土壌団粒化カード・プロトタイプ</title>
+<style>
+  :root {
+    --bg: #1a1614;
+    --panel: #27211d;
+    --border: #443931;
+    --text: #f3ede7;
+    --muted: #a99c90;
+    --accent: #68b86b;
+    --danger: #e05a47;
+    --water: #4da6ff;
+    --nutrient: #eab308;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", sans-serif; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 12px;
+    touch-action: manipulation;
+  }
+  header {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  h1 { font-size: 1rem; font-weight: 700; letter-spacing: 0.02em; }
+  .subtitle { font-size: 0.72rem; color: var(--muted); }
+  .btn-small {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+  .stats-bar {
+    width: 100%;
+    max-width: 480px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  .stat-label { font-size: 0.7rem; color: var(--muted); }
+  .stat-val { font-size: 1.05rem; font-weight: 700; margin-top: 2px; }
+  .progress-wrap {
+    width: 100%;
+    max-width: 480px;
+    background: #110e0c;
+    border-radius: 999px;
+    height: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    border: 1px solid var(--border);
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #5c8a47, #68b86b);
+    width: 15%;
+    transition: width 0.3s ease;
+  }
+  .grid-container {
+    width: 100%;
+    max-width: 480px;
+    aspect-ratio: 1 / 1;
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 5px;
+    background: #120f0d;
+    padding: 8px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 10px;
+  }
+  .cell {
+    border-radius: 7px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.12s, background 0.3s, box-shadow 0.2s;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .cell:active { transform: scale(0.94); }
+  .cell.target-area { box-shadow: inset 0 0 0 2px #ffd166; }
+  .cell-icon { font-size: 1.35rem; line-height: 1; z-index: 2; }
+  .cell-porosity {
+    position: absolute;
+    bottom: 2px;
+    right: 4px;
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    z-index: 2;
+  }
+  .pores-visual {
+    position: absolute;
+    inset: 3px;
+    border-radius: 5px;
+    pointer-events: none;
+    opacity: 0.55;
+  }
+  .log-box {
+    width: 100%;
+    max-width: 480px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 0.78rem;
+    color: #e2d8ce;
+    margin-bottom: 10px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+  }
+  .hand-section {
+    width: 100%;
+    max-width: 480px;
+  }
+  .hand-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .card {
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 7px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 112px;
+    transition: transform 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .card.selected {
+    border-color: #ffd166;
+    background: #352d27;
+    transform: translateY(-4px);
+  }
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+  .cost-badge {
+    background: #3d332c;
+    color: #ffd166;
+    padding: 1px 6px;
+    border-radius: 99px;
+    font-size: 0.7rem;
+  }
+  .card-emoji { font-size: 1.5rem; text-align: center; margin: 4px 0; }
+  .card-title { font-size: 0.78rem; font-weight: 700; text-align: center; margin-bottom: 3px; }
+  .card-desc { font-size: 0.65rem; color: var(--muted); line-height: 1.25; text-align: center; }
+  .actions {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    gap: 8px;
+  }
+  .btn-end {
+    flex: 1;
+    background: var(--accent);
+    color: #0e1a0f;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    padding: 11px;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .btn-reset {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.78);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 50;
+  }
+  .modal.show { display: flex; }
+  .modal-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+  }
+  .modal-card h2 { font-size: 1.25rem; margin-bottom: 8px; }
+  .modal-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.5; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1 id="ui-title">土壌団粒化カード・プロトタイプ</h1>
+    <div class="subtitle" id="ui-sub">SGJ2026 Concept B+C Mock (Card × Grid)</div>
+  </div>
+  <button class="btn-small" onclick="toggleLang()" id="btn-lang">EN / 日本語</button>
+</header>
+
+<div class="stats-bar">
+  <div>
+    <div class="stat-label" id="lbl-turn">ターン / TURN</div>
+    <div class="stat-val" id="val-turn">1 / 8</div>
+  </div>
+  <div>
+    <div class="stat-label" id="lbl-porosity">空隙率 / POROSITY</div>
+    <div class="stat-val" style="color: var(--accent);" id="val-porosity">18% / 65%</div>
+  </div>
+  <div>
+    <div class="stat-label" id="lbl-energy">行動力 / ENERGY</div>
+    <div class="stat-val" style="color: #ffd166;" id="val-energy">3 / 3</div>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-fill" id="progress-fill"></div>
+</div>
+
+<div class="grid-container" id="grid"></div>
+
+<div class="log-box" id="log-box">カードを選んでマスをタップしてください。</div>
+
+<div class="hand-section">
+  <div class="hand-header">
+    <span id="lbl-hand">手札 (1枚選択 → マスをタップ)</span>
+    <span id="lbl-hint">緑同士が隣り合うと相互給餌！</span>
+  </div>
+  <div class="cards" id="cards"></div>
+</div>
+
+<div class="actions">
+  <button class="btn-end" onclick="endTurn()" id="btn-end">ターン終了（環境シミュレート）</button>
+  <button class="btn-reset" onclick="initGame()" id="btn-reset">リセット</button>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-card">
+    <h2 id="modal-title">結果</h2>
+    <p id="modal-desc"></p>
+    <button class="btn-end" style="width:100%;" onclick="initGame()" id="btn-again">もう一度プレイ</button>
+  </div>
+</div>
+
+<script>
+  const SIZE = 6;
+  const MAX_TURNS = 8;
+  const TARGET_POROSITY = 65;
+  let lang = 'ja';
+
+  const TEXT = {
+    ja: {
+      title: '土壌団粒化カード・プロトタイプ',
+      turn: 'ターン',
+      porosity: '空隙率 (目標65%)',
+      energy: '行動力',
+      hand: '手札 (1枚選択 → マスをタップ)',
+      hint: '緑同士が隣接＝相互給餌で空隙UP！',
+      endBtn: 'ターン終了（相互給餌＆環境変化）',
+      resetBtn: 'リセット',
+      againBtn: 'もう一度プレイ',
+      startLog: '下のカードを選び、6×6の土壌マスをタップして配置しよう！',
+      noEnergy: '行動力が足りません！ターン終了を押してください。',
+      occupied: 'すでに生物がいるマスです（雨・栄養カードは使用可）。',
+      winTitle: '🎉 団粒構造の形成成功！',
+      loseTitle: '🥀 土壌が固まってしまった…',
+      cards: {
+        coop: { name: '協力型微生物', desc: '空きマスに配置。隣接する緑と相互給餌し周囲の空隙率を大きく上げる' },
+        pred: { name: '捕食・攻撃種', desc: '空きマスに配置。隣接する有害菌(👾)を撃退するが土が少し固まる' },
+        rain: { name: '雨カード (3×3)', desc: '選択した3×3範囲を潤し、緑の微生物の空隙生成を2倍加速させる' },
+        nutr: { name: '有機物・栄養', desc: '1マスの栄養を満タンにし、空隙率+15%＆周囲へ栄養を拡散' }
+      }
+    },
+    en: {
+      title: 'Soil Aggregate Card Prototype',
+      turn: 'TURN',
+      porosity: 'POROSITY (Goal 65%)',
+      energy: 'ENERGY',
+      hand: 'Hand (Select a card → Tap grid)',
+      hint: 'Adjacent Green = Cross-feeding boost!',
+      endBtn: 'End Turn (Simulate Feedback)',
+      resetBtn: 'Reset',
+      againBtn: 'Play Again',
+      startLog: 'Select a card below and tap a 6x6 soil cell to modify the structure!',
+      noEnergy: 'Not enough energy! Press End Turn.',
+      occupied: 'Cell occupied (Rain & Nutrient cards can still target here).',
+      winTitle: '🎉 Healthy Fractal Soil Formed!',
+      loseTitle: '🥀 Soil Became Compacted...',
+      cards: {
+        coop: { name: 'Coop Microbe', desc: 'Place on empty cell. Cross-feeds with adjacent green microbes to boost porosity.' },
+        pred: { name: 'Predator Microbe', desc: 'Place on empty cell. Eliminates adjacent pathogens (👾) but slightly compacts soil.' },
+        rain: { name: 'Rain Card (3x3)', desc: 'Waters a 3x3 area, boosting green microbe aggregation in moist cells.' },
+        nutr: { name: 'Organic Nutrient', desc: 'Enriches a cell (+15% porosity) and spreads nutrients to neighbors.' }
+      }
+    }
+  };
+
+  const CARD_DEFS = [
+    { id: 'coop', cost: 1, emoji: '🟢', color: '#68b86b' },
+    { id: 'pred', cost: 1, emoji: '🔴', color: '#e05a47' },
+    { id: 'rain', cost: 1, emoji: '🌧️', color: '#4da6ff' },
+    { id: 'nutr', cost: 1, emoji: '🟡', color: '#eab308' }
+  ];
+
+  let grid = [];
+  let turn = 1;
+  let energy = 3;
+  let hand = [];
+  let selectedCardIdx = 0;
+
+  function initGame() {
+    document.getElementById('modal').classList.remove('show');
+    turn = 1;
+    energy = 3;
+    grid = [];
+    for (let r = 0; r < SIZE; r++) {
+      const row = [];
+      for (let c = 0; c < SIZE; c++) {
+        row.push({
+          porosity: 12 + Math.floor(Math.random() * 10), // 初期空隙率 12-21%
+          moisture: 0,
+          entity: null // 'coop' | 'pred' | 'enemy'
+        });
+      }
+      grid.push(row);
+    }
+    // 初期の有害菌（敵）を3体配置
+    placeRandomEnemy(3);
+    drawHand();
+    setLog(TEXT[lang].startLog);
+    render();
+  }
+
+  function placeRandomEnemy(count) {
+    let placed = 0, tries = 0;
+    while (placed < count && tries < 50) {
+      tries++;
+      const r = Math.floor(Math.random() * SIZE);
+      const c = Math.floor(Math.random() * SIZE);
+      if (!grid[r][c].entity) {
+        grid[r][c].entity = 'enemy';
+        placed++;
+      }
+    }
+  }
+
+  function drawHand() {
+    hand = [
+      CARD_DEFS[0], // 協力種は必ず1枚
+      CARD_DEFS[Math.floor(Math.random() * CARD_DEFS.length)],
+      CARD_DEFS[Math.floor(Math.random() * CARD_DEFS.length)]
+    ];
+    selectedCardIdx = 0;
+  }
+
+  function toggleLang() {
+    lang = lang === 'ja' ? 'en' : 'ja';
+    render();
+  }
+
+  function setLog(msg) {
+    document.getElementById('log-box').textContent = msg;
+  }
+
+  function getAvgPorosity() {
+    let sum = 0;
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) sum += grid[r][c].porosity;
+    }
+    return Math.round(sum / (SIZE * SIZE));
+  }
+
+  function onCellClick(r, c) {
+    if (selectedCardIdx === null || !hand[selectedCardIdx]) return;
+    const card = hand[selectedCardIdx];
+    if (energy < card.cost) {
+      setLog(TEXT[lang].noEnergy);
+      return;
+    }
+
+    const cell = grid[r][c];
+
+    if (card.id === 'coop' || card.id === 'pred') {
+      if (cell.entity) {
+        setLog(TEXT[lang].occupied);
+        return;
+      }
+      cell.entity = card.id;
+      if (card.id === 'coop') {
+        cell.porosity = Math.min(100, cell.porosity + 12);
+        setLog(lang === 'ja' ? '協力型微生物を配置！周囲の仲間と相互給餌を始めます。' : 'Placed Coop Microbe! Ready to cross-feed with neighbors.');
+      } else {
+        cell.porosity = Math.max(5, cell.porosity - 5);
+        // 隣接する敵を即座に撃退
+        let killed = 0;
+        getNeighbors(r, c).forEach(([nr, nc]) => {
+          if (grid[nr][nc].entity === 'enemy') {
+            grid[nr][nc].entity = null;
+            killed++;
+          }
+        });
+        setLog(lang === 'ja' ? `捕食種を配置！隣接する有害菌を ${killed} 体撃退しました。` : `Placed Predator! Eliminated ${killed} adjacent pathogen(s).`);
+      }
+    } else if (card.id === 'rain') {
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          const nr = r + dr, nc = c + dc;
+          if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE) {
+            grid[nr][nc].moisture = 2;
+            if (grid[nr][nc].entity === 'coop') {
+              grid[nr][nc].porosity = Math.min(100, grid[nr][nc].porosity + 18);
+            } else {
+              // 微生物がいない場所の雨は少し土が締まる
+              grid[nr][nc].porosity = Math.max(5, grid[nr][nc].porosity - 3);
+            }
+          }
+        }
+      }
+      setLog(lang === 'ja' ? '🌧️ 3×3エリアに雨！協力微生物がいるマスは団粒化が大きく進行！' : '🌧️ Rain fell on 3x3 area! Coop microbes boosted aggregation!');
+    } else if (card.id === 'nutr') {
+      cell.porosity = Math.min(100, cell.porosity + 15);
+      getNeighbors(r, c).forEach(([nr, nc]) => {
+        grid[nr][nc].porosity = Math.min(100, grid[nr][nc].porosity + 6);
+      });
+      setLog(lang === 'ja' ? '🟡 有機物を供給！周囲の土壌の空隙率が上昇しました。' : '🟡 Nutrients added! Soil porosity increased around target.');
+    }
+
+    energy -= card.cost;
+    hand.splice(selectedCardIdx, 1);
+    selectedCardIdx = hand.length > 0 ? 0 : null;
+    checkWinImmediate();
+    render();
+  }
+
+  function getNeighbors(r, c) {
+    const res = [];
+    const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+    for (const [dr, dc] of dirs) {
+      const nr = r + dr, nc = c + dc;
+      if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE) res.push([nr, nc]);
+    }
+    return res;
+  }
+
+  function endTurn() {
+    // 1. セル・オートマトン的相互作用の計算
+    const nextPorosity = grid.map(row => row.map(c => c.porosity));
+
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) {
+        const cell = grid[r][c];
+        const neighbors = getNeighbors(r, c);
+
+        if (cell.entity === 'coop') {
+          // 隣接する協力種の数に応じて「相互給餌ボーナス」
+          const coopNeighbors = neighbors.filter(([nr, nc]) => grid[nr][nc].entity === 'coop').length;
+          const moistBonus = cell.moisture > 0 ? 6 : 0;
+          const gain = 6 + coopNeighbors * 7 + moistBonus;
+          nextPorosity[r][c] = Math.min(100, nextPorosity[r][c] + gain);
+          neighbors.forEach(([nr, nc]) => {
+            nextPorosity[nr][nc] = Math.min(100, nextPorosity[nr][nc] + 3 + coopNeighbors * 2);
+          });
+        } else if (cell.entity === 'enemy') {
+          // 有害菌は周囲の空隙を潰す（土を固める）
+          nextPorosity[r][c] = Math.max(5, nextPorosity[r][c] - 12);
+          neighbors.forEach(([nr, nc]) => {
+            nextPorosity[nr][nc] = Math.max(5, nextPorosity[nr][nc] - 5);
+          });
+        }
+
+        if (cell.moisture > 0) cell.moisture--;
+      }
+    }
+
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) {
+        grid[r][c].porosity = nextPorosity[r][c];
+      }
+    }
+
+    // 新たな有害菌が1体出現
+    if (turn < MAX_TURNS) placeRandomEnemy(1);
+
+    const avg = getAvgPorosity();
+    if (avg >= TARGET_POROSITY) {
+      showModal(true, avg);
+      return;
+    }
+
+    if (turn >= MAX_TURNS) {
+      showModal(false, avg);
+      return;
+    }
+
+    turn++;
+    energy = 3;
+    drawHand();
+    setLog(lang === 'ja' ? `ターン ${turn}：相互給餌により土壌構造が変化しました！` : `Turn ${turn}: Cross-feeding updated the soil structure!`);
+    render();
+  }
+
+  function checkWinImmediate() {
+    const avg = getAvgPorosity();
+    if (avg >= TARGET_POROSITY) {
+      showModal(true, avg);
+    }
+  }
+
+  function showModal(isWin, avg) {
+    const t = TEXT[lang];
+    document.getElementById('modal-title').textContent = isWin ? t.winTitle : t.loseTitle;
+    document.getElementById('modal-desc').textContent = lang === 'ja'
+      ? `最終空隙率: ${avg}%（目標 ${TARGET_POROSITY}%） / 経過ターン: ${turn}。微生物の協力ネットワークがフラクタルな空隙構造を生み出しました！`
+      : `Final Porosity: ${avg}% (Goal ${TARGET_POROSITY}%) in ${turn} turns. Microbial cooperation generated porous aggregate structures!`;
+    document.getElementById('modal').classList.add('show');
+  }
+
+  function render() {
+    const t = TEXT[lang];
+    document.getElementById('ui-title').textContent = t.title;
+    document.getElementById('lbl-turn').textContent = t.turn;
+    document.getElementById('lbl-porosity').textContent = t.porosity;
+    document.getElementById('lbl-energy').textContent = t.energy;
+    document.getElementById('lbl-hand').textContent = t.hand;
+    document.getElementById('lbl-hint').textContent = t.hint;
+    document.getElementById('btn-end').textContent = t.endBtn;
+    document.getElementById('btn-reset').textContent = t.resetBtn;
+    document.getElementById('btn-again').textContent = t.againBtn;
+
+    const avg = getAvgPorosity();
+    document.getElementById('val-turn').textContent = `${turn} / ${MAX_TURNS}`;
+    document.getElementById('val-porosity').textContent = `${avg}% / ${TARGET_POROSITY}%`;
+    document.getElementById('val-energy').textContent = `${energy} / 3`;
+    document.getElementById('progress-fill').style.width = `${Math.min(100, (avg / TARGET_POROSITY) * 100)}%`;
+
+    // グリッド描画
+    const gridEl = document.getElementById('grid');
+    gridEl.innerHTML = '';
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) {
+        const cell = grid[r][c];
+        const div = document.createElement('div');
+        div.className = 'cell';
+        // 空隙率に応じて土の色と白い孔（フラクタル風ドット）を変化
+        const p = cell.porosity;
+        const lightness = 22 + Math.round(p * 0.28);
+        div.style.backgroundColor = cell.moisture > 0
+          ? `hsl(205, 45%, ${lightness}%)`
+          : `hsl(28, 38%, ${lightness}%)`;
+
+        const pores = document.createElement('div');
+        pores.className = 'pores-visual';
+        if (p >= 25) {
+          const dotSize = p >= 65 ? 4 : 2.5;
+          const spacing = p >= 65 ? 9 : 13;
+          pores.style.backgroundImage = `radial-gradient(#fff6e5 ${dotSize}px, transparent ${dotSize}px)`;
+          pores.style.backgroundSize = `${spacing}px ${spacing}px`;
+        }
+        div.appendChild(pores);
+
+        const icon = document.createElement('div');
+        icon.className = 'cell-icon';
+        if (cell.entity === 'coop') icon.textContent = '🟢';
+        else if (cell.entity === 'pred') icon.textContent = '🔴';
+        else if (cell.entity === 'enemy') icon.textContent = '👾';
+        div.appendChild(icon);
+
+        const pLabel = document.createElement('div');
+        pLabel.className = 'cell-porosity';
+        pLabel.textContent = `${p}%`;
+        div.appendChild(pLabel);
+
+        div.onclick = () => onCellClick(r, c);
+        gridEl.appendChild(div);
+      }
+    }
+
+    // 手札描画
+    const cardsEl = document.getElementById('cards');
+    cardsEl.innerHTML = '';
+    hand.forEach((cDef, idx) => {
+      const cInfo = t.cards[cDef.id];
+      const cardDiv = document.createElement('div');
+      cardDiv.className = 'card' + (idx === selectedCardIdx ? ' selected' : '');
+      cardDiv.innerHTML = `
+        <div class="card-top">
+          <span style="color:${cDef.color};">●</span>
+          <span class="cost-badge">⚡${cDef.cost}</span>
+        </div>
+        <div class="card-emoji">${cDef.emoji}</div>
+        <div class="card-title">${cInfo.name}</div>
+        <div class="card-desc">${cInfo.desc}</div>
+      `;
+      cardDiv.onclick = () => {
+        selectedCardIdx = idx;
+        render();
+      };
+      cardsEl.appendChild(cardDiv);
+    });
+  }
+
+  initGame();
+</script>
+</body>
+</html>
