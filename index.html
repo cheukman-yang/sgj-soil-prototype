@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Soil Aggregate Card Prototype | 土壌団粒化カード・プロトタイプ</title>
+<title>Soil Aggregate Card Prototype | 土壌団粒化＆季節変動プロトタイプ</title>
 <style>
   :root {
     --bg: #1a1614;
@@ -13,8 +13,8 @@
     --muted: #a99c90;
     --accent: #68b86b;
     --danger: #e05a47;
-    --water: #4da6ff;
-    --nutrient: #eab308;
+    --summer: #f59e0b;
+    --winter: #38bdf8;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", sans-serif; }
   body {
@@ -26,17 +26,20 @@
     min-height: 100vh;
     padding: 12px;
     touch-action: manipulation;
+    transition: background 0.4s ease;
   }
+  body.season-summer { background: #1f1812; }
+  body.season-winter { background: #121a21; }
   header {
     width: 100%;
     max-width: 480px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
-  h1 { font-size: 1rem; font-weight: 700; letter-spacing: 0.02em; }
-  .subtitle { font-size: 0.72rem; color: var(--muted); }
+  h1 { font-size: 0.98rem; font-weight: 700; }
+  .subtitle { font-size: 0.7rem; color: var(--muted); }
   .btn-small {
     background: var(--panel);
     color: var(--text);
@@ -46,29 +49,46 @@
     font-size: 0.75rem;
     cursor: pointer;
   }
+  .season-banner {
+    width: 100%;
+    max-width: 480px;
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.82rem;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+  }
+  .season-banner.summer { background: rgba(245, 158, 11, 0.16); border-color: rgba(245, 158, 11, 0.5); color: #fcd34d; }
+  .season-banner.winter { background: rgba(56, 189, 248, 0.16); border-color: rgba(56, 189, 248, 0.5); color: #7dd3fc; }
+  .season-warn { font-size: 0.72rem; font-weight: 600; }
   .stats-bar {
     width: 100%;
     max-width: 480px;
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 10px;
-    padding: 10px 12px;
+    padding: 8px 10px;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 10px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
     text-align: center;
   }
-  .stat-label { font-size: 0.7rem; color: var(--muted); }
-  .stat-val { font-size: 1.05rem; font-weight: 700; margin-top: 2px; }
+  .stat-label { font-size: 0.65rem; color: var(--muted); }
+  .stat-val { font-size: 0.95rem; font-weight: 700; margin-top: 2px; }
   .progress-wrap {
     width: 100%;
     max-width: 480px;
     background: #110e0c;
     border-radius: 999px;
-    height: 10px;
+    height: 9px;
     overflow: hidden;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     border: 1px solid var(--border);
   }
   .progress-fill {
@@ -86,10 +106,10 @@
     grid-template-rows: repeat(6, 1fr);
     gap: 5px;
     background: #120f0d;
-    padding: 8px;
+    padding: 7px;
     border-radius: 12px;
     border: 1px solid var(--border);
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
   .cell {
     border-radius: 7px;
@@ -100,16 +120,16 @@
     justify-content: center;
     cursor: pointer;
     user-select: none;
-    transition: transform 0.12s, background 0.3s, box-shadow 0.2s;
+    transition: transform 0.12s, background 0.3s;
     border: 1px solid rgba(255,255,255,0.06);
   }
   .cell:active { transform: scale(0.94); }
-  .cell-icon { font-size: 1.35rem; line-height: 1; z-index: 2; }
+  .cell-icon { font-size: 1.3rem; line-height: 1; z-index: 2; }
   .cell-porosity {
     position: absolute;
     bottom: 2px;
     right: 4px;
-    font-size: 0.62rem;
+    font-size: 0.6rem;
     font-weight: 600;
     color: rgba(255,255,255,0.85);
     z-index: 2;
@@ -127,11 +147,11 @@
     background: var(--panel);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 7px 10px;
-    font-size: 0.78rem;
+    padding: 6px 10px;
+    font-size: 0.76rem;
     color: #e2d8ce;
-    margin-bottom: 10px;
-    min-height: 36px;
+    margin-bottom: 8px;
+    min-height: 34px;
     display: flex;
     align-items: center;
   }
@@ -143,26 +163,26 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 6px;
-    font-size: 0.78rem;
+    margin-bottom: 5px;
+    font-size: 0.74rem;
     color: var(--muted);
   }
   .cards {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 10px;
+    gap: 7px;
+    margin-bottom: 8px;
   }
   .card {
     background: var(--panel);
     border: 2px solid var(--border);
     border-radius: 10px;
-    padding: 9px 7px;
+    padding: 8px 6px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 112px;
+    min-height: 108px;
     transition: transform 0.15s, border-color 0.15s, background 0.15s;
   }
   .card.selected {
@@ -174,7 +194,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 700;
   }
   .cost-badge {
@@ -182,11 +202,11 @@
     color: #ffd166;
     padding: 1px 6px;
     border-radius: 99px;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
   }
-  .card-emoji { font-size: 1.5rem; text-align: center; margin: 4px 0; }
-  .card-title { font-size: 0.78rem; font-weight: 700; text-align: center; margin-bottom: 3px; }
-  .card-desc { font-size: 0.65rem; color: var(--muted); line-height: 1.25; text-align: center; }
+  .card-emoji { font-size: 1.4rem; text-align: center; margin: 3px 0; }
+  .card-title { font-size: 0.75rem; font-weight: 700; text-align: center; margin-bottom: 2px; }
+  .card-desc { font-size: 0.62rem; color: var(--muted); line-height: 1.22; text-align: center; }
   .actions {
     width: 100%;
     max-width: 480px;
@@ -200,8 +220,8 @@
     font-weight: 700;
     border: none;
     border-radius: 8px;
-    padding: 11px;
-    font-size: 0.9rem;
+    padding: 10px;
+    font-size: 0.88rem;
     cursor: pointer;
   }
   .btn-reset {
@@ -209,8 +229,8 @@
     color: var(--text);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 11px 14px;
-    font-size: 0.85rem;
+    padding: 10px 14px;
+    font-size: 0.82rem;
     cursor: pointer;
   }
   .modal {
@@ -233,31 +253,40 @@
     width: 100%;
     text-align: center;
   }
-  .modal-card h2 { font-size: 1.25rem; margin-bottom: 8px; }
-  .modal-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.5; margin-bottom: 16px; }
+  .modal-card h2 { font-size: 1.2rem; margin-bottom: 8px; }
+  .modal-card p { font-size: 0.84rem; color: var(--muted); line-height: 1.5; margin-bottom: 16px; }
 </style>
 </head>
-<body>
+<body class="season-summer">
 
 <header>
   <div>
-    <h1 id="ui-title">土壌団粒化カード・プロトタイプ</h1>
-    <div class="subtitle" id="ui-sub">SGJ2026 Concept B+C Mock (Card × Grid)</div>
+    <h1 id="ui-title">土壌団粒化＆季節変動カード・プロトタイプ</h1>
+    <div class="subtitle">SGJ2026 Concept B+C (Season Switching & Coexistence)</div>
   </div>
   <button class="btn-small" onclick="toggleLang()" id="btn-lang">EN / 日本語</button>
 </header>
 
+<div class="season-banner summer" id="season-banner">
+  <span id="season-label">☀️ 現在の季節：夏（Summer）</span>
+  <span class="season-warn" id="season-streak">連続 1 ターン目（3ターン連続で片方が絶滅！）</span>
+</div>
+
 <div class="stats-bar">
   <div>
-    <div class="stat-label" id="lbl-turn">ターン / TURN</div>
+    <div class="stat-label" id="lbl-turn">ターン</div>
     <div class="stat-val" id="val-turn">1 / 8</div>
   </div>
   <div>
-    <div class="stat-label" id="lbl-porosity">空隙率 / POROSITY</div>
-    <div class="stat-val" style="color: var(--accent);" id="val-porosity">20% / 50%</div>
+    <div class="stat-label" id="lbl-porosity">空隙率 (目標55%)</div>
+    <div class="stat-val" style="color: var(--accent);" id="val-porosity">18%</div>
   </div>
   <div>
-    <div class="stat-label" id="lbl-energy">行動力 / ENERGY</div>
+    <div class="stat-label" id="lbl-species">共存数 (🟢/🔵)</div>
+    <div class="stat-val" id="val-species">2 / 2</div>
+  </div>
+  <div>
+    <div class="stat-label" id="lbl-energy">行動力</div>
     <div class="stat-val" style="color: #ffd166;" id="val-energy">3 / 3</div>
   </div>
 </div>
@@ -268,18 +297,18 @@
 
 <div class="grid-container" id="grid"></div>
 
-<div class="log-box" id="log-box">カードを選んでマスをタップしてください。</div>
+<div class="log-box" id="log-box">同じ季節が続くと1種が絶滅します。季節カードで切り替えよう！</div>
 
 <div class="hand-section">
   <div class="hand-header">
-    <span id="lbl-hand">手札 (1枚選択 → マスをタップ)</span>
-    <span id="lbl-hint">緑同士が隣接＝相互給餌で空隙UP！</span>
+    <span id="lbl-hand">手札 (選択 → マスをタップ)</span>
+    <span id="lbl-hint">🟢＋🔵共存で相互給餌ボーナス！</span>
   </div>
   <div class="cards" id="cards"></div>
 </div>
 
 <div class="actions">
-  <button class="btn-end" onclick="endTurn()" id="btn-end">ターン終了（環境シミュレート）</button>
+  <button class="btn-end" onclick="endTurn()" id="btn-end">ターン終了（季節進行＆相互給餌）</button>
   <button class="btn-reset" onclick="initGame()" id="btn-reset">リセット</button>
 </div>
 
@@ -294,66 +323,73 @@
 <script>
   const SIZE = 6;
   const MAX_TURNS = 8;
-  const TARGET_POROSITY = 50;
+  const TARGET_POROSITY = 55;
   let lang = 'ja';
 
   const TEXT = {
     ja: {
-      title: '土壌団粒化カード・プロトタイプ',
+      title: '土壌団粒化＆季節変動プロトタイプ',
       turn: 'ターン',
-      porosity: '空隙率 (目標50%)',
+      porosity: '空隙率(目標55%)',
+      species: '共存(🟢/🔵)',
       energy: '行動力',
-      hand: '手札 (1枚選択 → マスをタップ)',
-      hint: '緑同士が隣接＝相互給餌で周囲8マスに波及！',
-      endBtn: 'ターン終了（相互給餌＆環境変化）',
+      hand: '手札 (選択 → マスをタップ)',
+      hint: '季節を切り替えて🟢と🔵を共存させよう！',
+      endBtn: 'ターン終了（環境進行＆相互給餌）',
       resetBtn: 'リセット',
       againBtn: 'もう一度プレイ',
-      startLog: '下のカードを選び、6×6の土壌マスをタップして配置しよう！',
+      startLog: '同じ季節が3ターン続くと片方の種が絶滅！季節カードで環境を切り替えよう。',
       noEnergy: '行動力が足りません！ターン終了を押してください。',
-      occupied: 'すでに生物がいるマスです（雨・栄養カードは使用可）。',
-      winTitle: '🎉 団粒構造の形成成功！',
-      loseTitle: '🥀 土壌が固まってしまった…',
+      occupied: 'すでに微生物がいるマスです（季節・雨カードはどこでも使用可）。',
+      winTitle: '🎉 季節変動による共存＆団粒化成功！',
+      loseTitle: '🥀 多様性が失われ土壌が固まった…',
       cards: {
-        coop: { name: '協力型微生物', desc: '空きマスに配置。隣接する緑と相互給餌し周囲の空隙率を大きく上げる' },
-        pred: { name: '捕食・攻撃種', desc: '空きマスに配置。周囲8マスの有害菌(👾)を撃退する' },
-        rain: { name: '雨カード (3×3)', desc: '選択した3×3範囲を潤し、緑の微生物の空隙生成を大幅に加速させる' },
-        nutr: { name: '有機物・栄養', desc: '1マスの空隙率+20%＆周囲8マスへ栄養を拡散して空隙を広げる' }
+        green: { name: '夏適応種 🟢', desc: '空きマスに配置。夏に活発だが、冬が続くと弱る。🔵と隣接で相互給餌！' },
+        blue: { name: '冬適応種 🔵', desc: '空きマスに配置。冬に活発だが、夏が続くと弱る。🟢と隣接で相互給餌！' },
+        season: { name: '季節変更 ☀️⇄❄️', desc: '夏と冬を手動で切り替え！絶滅を防ぎ、全マスの共存ボーナス発動' },
+        rain: { name: '雨カード (3×3)', desc: '3×3範囲を潤し、微生物がいるマスの空隙率を大きく上げる' },
+        pred: { name: '捕食種 🔴', desc: '空きマスに配置し、周囲8マスの有害菌(👾)を撃退する' }
       }
     },
     en: {
-      title: 'Soil Aggregate Card Prototype',
+      title: 'Season-Switching Soil Prototype',
       turn: 'TURN',
-      porosity: 'POROSITY (Goal 50%)',
+      porosity: 'POROSITY (55%)',
+      species: 'COEXIST (🟢/🔵)',
       energy: 'ENERGY',
-      hand: 'Hand (Select a card → Tap grid)',
-      hint: 'Adjacent Green = Cross-feeding spreads to 8 neighbors!',
-      endBtn: 'End Turn (Simulate Feedback)',
+      hand: 'Hand (Select → Tap grid)',
+      hint: 'Switch seasons to keep both 🟢 & 🔵 alive!',
+      endBtn: 'End Turn (Simulate Season & Feedback)',
       resetBtn: 'Reset',
       againBtn: 'Play Again',
-      startLog: 'Select a card below and tap a 6x6 soil cell to modify the structure!',
+      startLog: 'If one season stays for 3 turns, one species goes extinct! Use Season cards!',
       noEnergy: 'Not enough energy! Press End Turn.',
-      occupied: 'Cell occupied (Rain & Nutrient cards can still target here).',
-      winTitle: '🎉 Healthy Fractal Soil Formed!',
-      loseTitle: '🥀 Soil Became Compacted...',
+      occupied: 'Cell occupied (Season & Rain cards can target anywhere).',
+      winTitle: '🎉 Coexistence & Fractal Soil Achieved!',
+      loseTitle: '🥀 Diversity Lost & Soil Compacted...',
       cards: {
-        coop: { name: 'Coop Microbe', desc: 'Place on empty cell. Cross-feeds with adjacent green microbes to boost porosity.' },
-        pred: { name: 'Predator Microbe', desc: 'Place on empty cell. Eliminates pathogens (👾) in 8 surrounding cells.' },
-        rain: { name: 'Rain Card (3x3)', desc: 'Waters a 3x3 area, boosting green microbe aggregation in moist cells.' },
-        nutr: { name: 'Organic Nutrient', desc: 'Enriches a cell (+20% porosity) and spreads nutrients to 8 neighbors.' }
+        green: { name: 'Summer Microbe 🟢', desc: 'Thrives in Summer, weakens in prolonged Winter. Cross-feeds with 🔵!' },
+        blue: { name: 'Winter Microbe 🔵', desc: 'Thrives in Winter, weakens in prolonged Summer. Cross-feeds with 🟢!' },
+        season: { name: 'Switch Season ☀️⇄❄️', desc: 'Manually flip Summer/Winter! Prevents extinction & triggers coexistence boost.' },
+        rain: { name: 'Rain Card (3x3)', desc: 'Waters a 3x3 area, boosting porosity around active microbes.' },
+        pred: { name: 'Predator 🔴', desc: 'Eliminates pathogens (👾) in 8 surrounding cells.' }
       }
     }
   };
 
   const CARD_DEFS = [
-    { id: 'coop', cost: 1, emoji: '🟢', color: '#68b86b' },
-    { id: 'pred', cost: 1, emoji: '🔴', color: '#e05a47' },
-    { id: 'rain', cost: 1, emoji: '🌧️', color: '#4da6ff' },
-    { id: 'nutr', cost: 1, emoji: '🟡', color: '#eab308' }
+    { id: 'season', cost: 1, emoji: '☀️❄️', color: '#ffd166' },
+    { id: 'green', cost: 1, emoji: '🟢', color: '#68b86b' },
+    { id: 'blue', cost: 1, emoji: '🔵', color: '#38bdf8' },
+    { id: 'rain', cost: 1, emoji: '🌧️', color: '#60a5fa' },
+    { id: 'pred', cost: 1, emoji: '🔴', color: '#e05a47' }
   ];
 
   let grid = [];
   let turn = 1;
   let energy = 3;
+  let season = 'summer'; // 'summer' | 'winter'
+  let seasonStreak = 1;
   let hand = [];
   let selectedCardIdx = 0;
 
@@ -361,18 +397,25 @@
     document.getElementById('modal').classList.remove('show');
     turn = 1;
     energy = 3;
+    season = 'summer';
+    seasonStreak = 1;
     grid = [];
     for (let r = 0; r < SIZE; r++) {
       const row = [];
       for (let c = 0; c < SIZE; c++) {
         row.push({
-          porosity: 15 + Math.floor(Math.random() * 10),
+          porosity: 16 + Math.floor(Math.random() * 8),
           moisture: 0,
-          entity: null
+          entity: null // 'green' | 'blue' | 'pred' | 'enemy'
         });
       }
       grid.push(row);
     }
+    // 初期配置：夏種🟢と冬種🔵を2体ずつ隣接気味に配置＋敵2体
+    grid[2][2].entity = 'green';
+    grid[2][3].entity = 'blue';
+    grid[3][2].entity = 'blue';
+    grid[3][3].entity = 'green';
     placeRandomEnemy(2);
     drawHand();
     setLog(TEXT[lang].startLog);
@@ -393,10 +436,12 @@
   }
 
   function drawHand() {
+    // 季節カードは常に1枚手札に来るようにして、プレイヤーが能動的に季節を操れるようにする
+    const pool = [CARD_DEFS[1], CARD_DEFS[2], CARD_DEFS[3], CARD_DEFS[4]];
     hand = [
       CARD_DEFS[0],
-      CARD_DEFS[Math.floor(Math.random() * CARD_DEFS.length)],
-      CARD_DEFS[Math.floor(Math.random() * CARD_DEFS.length)]
+      pool[Math.floor(Math.random() * pool.length)],
+      pool[Math.floor(Math.random() * pool.length)]
     ];
     selectedCardIdx = 0;
   }
@@ -416,6 +461,17 @@
       for (let c = 0; c < SIZE; c++) sum += grid[r][c].porosity;
     }
     return Math.round(sum / (SIZE * SIZE));
+  }
+
+  function getSpeciesCounts() {
+    let g = 0, b = 0;
+    for (let r = 0; r < SIZE; r++) {
+      for (let c = 0; c < SIZE; c++) {
+        if (grid[r][c].entity === 'green') g++;
+        if (grid[r][c].entity === 'blue') b++;
+      }
+    }
+    return { g, b };
   }
 
   function getNeighbors8(r, c) {
@@ -440,15 +496,29 @@
 
     const cell = grid[r][c];
 
-    if (card.id === 'coop' || card.id === 'pred') {
+    if (card.id === 'season') {
+      season = season === 'summer' ? 'winter' : 'summer';
+      seasonStreak = 1;
+      // 季節切り替え時の共存ボーナス
+      for (let rr = 0; rr < SIZE; rr++) {
+        for (let cc = 0; cc < SIZE; cc++) {
+          if (grid[rr][cc].entity === 'green' || grid[rr][cc].entity === 'blue') {
+            grid[rr][cc].porosity = Math.min(100, grid[rr][cc].porosity + 8);
+          }
+        }
+      }
+      setLog(lang === 'ja'
+        ? `☀️⇄❄️ 季節を「${season === 'summer' ? '夏' : '冬'}」に切り替え！絶滅を回避し共存ボーナス発生！`
+        : `☀️⇄❄️ Switched to ${season.toUpperCase()}! Extinction prevented & coexistence boosted!`);
+    } else if (card.id === 'green' || card.id === 'blue' || card.id === 'pred') {
       if (cell.entity) {
         setLog(TEXT[lang].occupied);
         return;
       }
       cell.entity = card.id;
-      if (card.id === 'coop') {
-        cell.porosity = Math.min(100, cell.porosity + 16);
-        setLog(lang === 'ja' ? '協力型微生物を配置！周囲の仲間と相互給餌を始めます。' : 'Placed Coop Microbe! Ready to cross-feed with neighbors.');
+      if (card.id === 'green' || card.id === 'blue') {
+        cell.porosity = Math.min(100, cell.porosity + 14);
+        setLog(lang === 'ja' ? '微生物を配置！異種（🟢と🔵）が隣り合うと相互給餌が加速します。' : 'Microbe placed! Adjacent 🟢 & 🔵 trigger cross-feeding!');
       } else {
         let killed = 0;
         getNeighbors8(r, c).forEach(([nr, nc]) => {
@@ -457,7 +527,7 @@
             killed++;
           }
         });
-        setLog(lang === 'ja' ? `捕食種を配置！周囲の有害菌を ${killed} 体撃退しました。` : `Placed Predator! Eliminated ${killed} pathogen(s).`);
+        setLog(lang === 'ja' ? `🔴 捕食種を配置！周囲の有害菌を ${killed} 体撃退！` : `🔴 Predator eliminated ${killed} pathogen(s)!`);
       }
     } else if (card.id === 'rain') {
       for (let dr = -1; dr <= 1; dr++) {
@@ -465,21 +535,15 @@
           const nr = r + dr, nc = c + dc;
           if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE) {
             grid[nr][nc].moisture = 2;
-            if (grid[nr][nc].entity === 'coop') {
-              grid[nr][nc].porosity = Math.min(100, grid[nr][nc].porosity + 24);
+            if (grid[nr][nc].entity === 'green' || grid[nr][nc].entity === 'blue') {
+              grid[nr][nc].porosity = Math.min(100, grid[nr][nc].porosity + 20);
             } else {
               grid[nr][nc].porosity = Math.min(100, grid[nr][nc].porosity + 4);
             }
           }
         }
       }
-      setLog(lang === 'ja' ? '🌧️ 3×3エリアに雨！協力微生物がいるマスの団粒化が大きく進行！' : '🌧️ Rain fell on 3x3 area! Coop microbes boosted aggregation!');
-    } else if (card.id === 'nutr') {
-      cell.porosity = Math.min(100, cell.porosity + 20);
-      getNeighbors8(r, c).forEach(([nr, nc]) => {
-        grid[nr][nc].porosity = Math.min(100, grid[nr][nc].porosity + 8);
-      });
-      setLog(lang === 'ja' ? '🟡 有機物を供給！周囲8マスの土壌の空隙率が上昇しました。' : '🟡 Nutrients added! Soil porosity increased in 8 neighbors.');
+      setLog(lang === 'ja' ? '🌧️ 3×3エリアに雨！微生物の団粒化が加速しました。' : '🌧️ Rain watered 3x3 area! Aggregation accelerated.');
     }
 
     energy -= card.cost;
@@ -491,19 +555,43 @@
 
   function endTurn() {
     const nextPorosity = grid.map(row => row.map(c => c.porosity));
+    let extinctionMsg = '';
+
+    // 同じ季節が3ターン以上続くと、不適応な種が競争排除で消滅する！
+    if (seasonStreak >= 3) {
+      const doomed = season === 'summer' ? 'blue' : 'green';
+      let removed = 0;
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          if (grid[r][c].entity === doomed) {
+            grid[r][c].entity = null;
+            nextPorosity[r][c] = Math.max(5, nextPorosity[r][c] - 15);
+            removed++;
+          }
+        }
+      }
+      if (removed > 0) {
+        extinctionMsg = lang === 'ja'
+          ? ` ⚠️ 同じ季節が続いたため${doomed === 'blue' ? '冬適応種🔵' : '夏適応種🟢'}が絶滅しました！`
+          : ` ⚠️ Prolonged ${season} caused ${doomed} species extinction!`;
+      }
+    }
 
     for (let r = 0; r < SIZE; r++) {
       for (let c = 0; c < SIZE; c++) {
         const cell = grid[r][c];
         const neighbors = getNeighbors8(r, c);
 
-        if (cell.entity === 'coop') {
-          const coopNeighbors = neighbors.filter(([nr, nc]) => grid[nr][nc].entity === 'coop').length;
-          const moistBonus = cell.moisture > 0 ? 8 : 0;
-          const gain = 8 + coopNeighbors * 8 + moistBonus;
+        if (cell.entity === 'green' || cell.entity === 'blue') {
+          const isFavored = (season === 'summer' && cell.entity === 'green') || (season === 'winter' && cell.entity === 'blue');
+          const partnerType = cell.entity === 'green' ? 'blue' : 'green';
+          const hasPartner = neighbors.some(([nr, nc]) => grid[nr][nc].entity === partnerType);
+
+          // 異種共存（相互給餌）ボーナス＋季節適応ボーナス
+          const gain = (isFavored ? 10 : 4) + (hasPartner ? 12 : 0) + (cell.moisture > 0 ? 5 : 0);
           nextPorosity[r][c] = Math.min(100, nextPorosity[r][c] + gain);
           neighbors.forEach(([nr, nc]) => {
-            nextPorosity[nr][nc] = Math.min(100, nextPorosity[nr][nc] + 4 + coopNeighbors * 2);
+            nextPorosity[nr][nc] = Math.min(100, nextPorosity[nr][nc] + (hasPartner ? 5 : 2));
           });
         } else if (cell.entity === 'enemy') {
           nextPorosity[r][c] = Math.max(5, nextPorosity[r][c] - 10);
@@ -536,9 +624,12 @@
     }
 
     turn++;
+    seasonStreak++;
     energy = 3;
     drawHand();
-    setLog(lang === 'ja' ? `ターン ${turn}：相互給餌により土壌構造が変化しました！` : `Turn ${turn}: Cross-feeding updated the soil structure!`);
+    setLog((lang === 'ja'
+      ? `ターン ${turn}：相互給餌により土壌構造が更新されました！`
+      : `Turn ${turn}: Cross-feeding updated soil structure!`) + extinctionMsg);
     render();
   }
 
@@ -551,24 +642,42 @@
 
   function showModal(isWin, avg) {
     const t = TEXT[lang];
+    const { g, b } = getSpeciesCounts();
     document.getElementById('modal-title').textContent = isWin ? t.winTitle : t.loseTitle;
     if (isWin) {
       document.getElementById('modal-desc').textContent = lang === 'ja'
-        ? `最終空隙率: ${avg}%（目標 ${TARGET_POROSITY}%） / 経過ターン: ${turn}。微生物の協力ネットワークがフラクタルな空隙構造を生み出しました！`
-        : `Final Porosity: ${avg}% (Goal ${TARGET_POROSITY}%) in ${turn} turns. Microbial cooperation generated porous aggregate structures!`;
+        ? `最終空隙率: ${avg}%（目標 ${TARGET_POROSITY}%） / 経過ターン: ${turn}（生存種: 🟢×${g}, 🔵×${b}）。季節の切り替えによって競争排除を防ぎ、2種の共存で団粒構造を達成しました！`
+        : `Final Porosity: ${avg}% (Goal ${TARGET_POROSITY}%) in ${turn} turns (🟢×${g}, 🔵×${b}). Switching seasons prevented competitive exclusion and enabled coexistence!`;
     } else {
       document.getElementById('modal-desc').textContent = lang === 'ja'
-        ? `最終空隙率: ${avg}%（目標 ${TARGET_POROSITY}%）。有害菌による圧密を抑えきれませんでした。緑の微生物を隣り合わせて配置し、雨カードで連鎖を加速させてみよう！`
-        : `Final Porosity: ${avg}% (Goal ${TARGET_POROSITY}%). Place green microbes adjacent to each other and boost them with Rain cards!`;
+        ? `最終空隙率: ${avg}%（目標 ${TARGET_POROSITY}%）。同じ季節が続くと1種だけが生き残り、相互給餌が止まってしまいます。季節変更カード（☀️⇄❄️）をこまめに使ってみよう！`
+        : `Final Porosity: ${avg}% (Goal ${TARGET_POROSITY}%). Keeping one season causes extinction of the other species. Use the Season Switch card regularly!`;
     }
     document.getElementById('modal').classList.add('show');
   }
 
   function render() {
     const t = TEXT[lang];
+    document.body.className = season === 'summer' ? 'season-summer' : 'season-winter';
+
+    const banner = document.getElementById('season-banner');
+    banner.className = `season-banner ${season}`;
+    if (lang === 'ja') {
+      document.getElementById('season-label').textContent = season === 'summer' ? '☀️ 現在の季節：夏（🟢活発）' : '❄️ 現在の季節：冬（🔵活発）';
+      document.getElementById('season-streak').textContent = seasonStreak >= 3
+        ? '⚠️ 限界！このターンで季節を変えないと片方が絶滅！'
+        : `連続 ${seasonStreak} ターン目（3ターン連続で絶滅危機）`;
+    } else {
+      document.getElementById('season-label').textContent = season === 'summer' ? '☀️ Season: SUMMER (🟢 Active)' : '❄️ Season: WINTER (🔵 Active)';
+      document.getElementById('season-streak').textContent = seasonStreak >= 3
+        ? '⚠️ DANGER! Switch season now or 1 species dies!'
+        : `Streak: ${seasonStreak} turn(s) (Extinction at 3)`;
+    }
+
     document.getElementById('ui-title').textContent = t.title;
     document.getElementById('lbl-turn').textContent = t.turn;
     document.getElementById('lbl-porosity').textContent = t.porosity;
+    document.getElementById('lbl-species').textContent = t.species;
     document.getElementById('lbl-energy').textContent = t.energy;
     document.getElementById('lbl-hand').textContent = t.hand;
     document.getElementById('lbl-hint').textContent = t.hint;
@@ -577,8 +686,12 @@
     document.getElementById('btn-again').textContent = t.againBtn;
 
     const avg = getAvgPorosity();
+    const { g, b } = getSpeciesCounts();
+    const coexistCount = (g > 0 ? 1 : 0) + (b > 0 ? 1 : 0);
     document.getElementById('val-turn').textContent = `${turn} / ${MAX_TURNS}`;
-    document.getElementById('val-porosity').textContent = `${avg}% / ${TARGET_POROSITY}%`;
+    document.getElementById('val-porosity').textContent = `${avg}%`;
+    document.getElementById('val-species').textContent = `${coexistCount} / 2`;
+    document.getElementById('val-species').style.color = coexistCount === 2 ? '#68b86b' : '#e05a47';
     document.getElementById('val-energy').textContent = `${energy} / 3`;
     document.getElementById('progress-fill').style.width = `${Math.min(100, (avg / TARGET_POROSITY) * 100)}%`;
 
@@ -591,15 +704,19 @@
         div.className = 'cell';
         const p = cell.porosity;
         const lightness = 22 + Math.round(p * 0.28);
-        div.style.backgroundColor = cell.moisture > 0
-          ? `hsl(205, 45%, ${lightness}%)`
-          : `hsl(28, 38%, ${lightness}%)`;
+        if (cell.moisture > 0) {
+          div.style.backgroundColor = `hsl(205, 45%, ${lightness}%)`;
+        } else if (season === 'winter') {
+          div.style.backgroundColor = `hsl(210, 22%, ${lightness}%)`;
+        } else {
+          div.style.backgroundColor = `hsl(28, 38%, ${lightness}%)`;
+        }
 
         const pores = document.createElement('div');
         pores.className = 'pores-visual';
         if (p >= 25) {
-          const dotSize = p >= 50 ? 4 : 2.5;
-          const spacing = p >= 50 ? 9 : 13;
+          const dotSize = p >= 55 ? 4 : 2.5;
+          const spacing = p >= 55 ? 9 : 13;
           pores.style.backgroundImage = `radial-gradient(#fff6e5 ${dotSize}px, transparent ${dotSize}px)`;
           pores.style.backgroundSize = `${spacing}px ${spacing}px`;
         }
@@ -607,7 +724,8 @@
 
         const icon = document.createElement('div');
         icon.className = 'cell-icon';
-        if (cell.entity === 'coop') icon.textContent = '🟢';
+        if (cell.entity === 'green') icon.textContent = '🟢';
+        else if (cell.entity === 'blue') icon.textContent = '🔵';
         else if (cell.entity === 'pred') icon.textContent = '🔴';
         else if (cell.entity === 'enemy') icon.textContent = '👾';
         div.appendChild(icon);
